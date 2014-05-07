@@ -3,14 +3,19 @@
 #
 
 # CC
+#指定gcc程序作为编译程序
 CC=gcc
 # Path to parent kernel include files directory
 LIBC_INCLUDE=/usr/include
 # Libraries
 ADDLIB=
 # Linker flags
+#Wl选项告诉编译器将后面的参数传递给链接器
+#-Wl,-Bstatic告诉链接器使用-Bstatic选项，该选项是告诉链接器，对接下来的-l选项使用静态链接
+#-Wl,-Bdynamic就是告诉链接器对接下来的-l选项使用动态链接
 LDFLAG_STATIC=-Wl,-Bstatic
 LDFLAG_DYNAMIC=-Wl,-Bdynamic
+#指定加载库lcap
 LDFLAG_CAP=-lcap
 LDFLAG_GNUTLS=-lgnutls-openssl
 LDFLAG_CRYPTO=-lcrypto
@@ -21,7 +26,7 @@ LDFLAG_SYSFS=-lsysfs
 #
 # Options
 #
-
+#变量定义，设置开关
 # Capability support (with libcap) [yes|static|no]
 USE_CAP=yes
 # sysfs support (with libsysfs - deprecated) [no|yes|static]
@@ -49,6 +54,7 @@ ENABLE_RDISC_SERVER=no
 # -------------------------------------
 # What a pity, all new gccs are buggy and -Werror does not work. Sigh.
 # CCOPT=-fno-strict-aliasing -Wstrict-prototypes -Wall -Werror -g
+#-Wstrict-prototypes: 如果函数的声明或定义没有指出参数类型，编译器就发出警告
 CCOPT=-fno-strict-aliasing -Wstrict-prototypes -Wall -g
 CCOPTOPT=-O3
 GLIBCFIX=-D_GNU_SOURCE
@@ -129,6 +135,12 @@ all: $(TARGETS)
 	$(COMPILE.c) $< $(DEF_$(patsubst %.o,%,$@)) -S -o $@
 %.o: %.c
 	$(COMPILE.c) $< $(DEF_$(patsubst %.o,%,$@)) -o $@
+# COMPILE.c=$(CC) $(CFLAGS) $(CPPFLAGS) -c
+# $< 依赖目标中的第一个目标名字
+# $@ 表示目标 
+#$(patsubst %.o,%,$@)表示将所指目标只要是以.o为后缀的都将删除后缀。如目标为test.o,$(patsubst %.o,%,$@)=test
+#$(DEF_$(patsubst %.o,%,$@)) 表明函数所属的库
+# $^ 所有的依赖目标的集合 
 $(TARGETS): %: %.o
 	$(LINK.o) $^ $(LIB_$@) $(LDLIBS) -o $@
 
