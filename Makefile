@@ -12,12 +12,13 @@ LIBC_INCLUDE=/usr/include
 #库
 ADDLIB=
 # Linker flags
+#连接标志
 #Wl选项告诉编译器将后面的参数传递给链接器
 #-Wl,-Bstatic告诉链接器使用-Bstatic选项，该选项是告诉链接器，对接下来的-l选项使用静态链接
 #-Wl,-Bdynamic就是告诉链接器对接下来的-l选项使用动态链接
 LDFLAG_STATIC=-Wl,-Bstatic
 LDFLAG_DYNAMIC=-Wl,-Bdynamic
-#指定各种加载库
+#指定加载库
 LDFLAG_CAP=-lcap
 LDFLAG_GNUTLS=-lgnutls-openssl
 LDFLAG_CRYPTO=-lcrypto
@@ -37,7 +38,7 @@ USE_CAP=yes
 #sysfs的支持（与libsysfs - 不建议使用）
 USE_SYSFS=no
 # IDN support (experimental) [no|yes|static]
-#支持IDN（国际化域名）（实验）
+#不支持IDN（国际化域名）（实验）
 USE_IDN=no
 
 # 不使用getifaddrs [no|yes|static]
@@ -60,7 +61,7 @@ USE_RESOLV=yes
 ENABLE_PING6_RTHDR=no
 
 # rdisc server (-r option) support [no|yes]
-#不支持RDISC服务器（-r选项）
+#不支持RDISC服务器（-r选项）；RDISC：路由器发现守护程序
 ENABLE_RDISC_SERVER=no
 
 # -------------------------------------
@@ -161,14 +162,19 @@ all: $(TARGETS)
 # COMPILE.c=$(CC) $(CFLAGS) $(CPPFLAGS) -c
 # $< 依赖目标中的第一个目标名字
 # $@ 表示目标 
-#$(patsubst %.o,%,$@)表示将所指目标只要是以.o为后缀的都将删除后缀。如目标为test.o,$(patsubst %.o,%,$@)=test
+#$(patsubst %.o,%,$@)表示将所指目标只要是以.o为后缀的都将删除后缀。DEF_ping.如目标为test.o,$(patsubst %.o,%,$@)=test
 #$(DEF_$(patsubst %.o,%,$@)) 表明函数所属的库
 # $^ 所有的依赖目标的集合 
 $(TARGETS): %: %.o
 	$(LINK.o) $^ $(LIB_$@) $(LDLIBS) -o $@
+# LINK.o把.o文件链接在一起的命令行,缺省值是$(CC)   $(LDFLAGS) $(TARGET_ARCH)
+#以ping为例，翻译为：
+# gcc -O3 -fno-strict-aliasing -Wstrict-prototypes -Wall -g -D_GNU_SOURCE    -c ping.c -DCAPABILITIES   -o ping.o
+#gcc   ping.o ping_common.o -lcap    -o ping
 
 # -------------------------------------
 # arping
+#设置arping
 DEF_arping = $(DEF_SYSFS) $(DEF_CAP) $(DEF_IDN) $(DEF_WITHOUT_IFADDRS)
 LIB_arping = $(LIB_SYSFS) $(LIB_CAP) $(LIB_IDN)
 
@@ -177,16 +183,19 @@ DEF_arping += -DDEFAULT_DEVICE=\"$(ARPING_DEFAULT_DEVICE)\"
 endif
 
 # clockdiff
+#设置clockdiff
 DEF_clockdiff = $(DEF_CAP)
 LIB_clockdiff = $(LIB_CAP)
 
 # ping / ping6
+# 设置ping / ping6
 DEF_ping_common = $(DEF_CAP) $(DEF_IDN)
 DEF_ping  = $(DEF_CAP) $(DEF_IDN) $(DEF_WITHOUT_IFADDRS)
 LIB_ping  = $(LIB_CAP) $(LIB_IDN)
 DEF_ping6 = $(DEF_CAP) $(DEF_IDN) $(DEF_WITHOUT_IFADDRS) $(DEF_ENABLE_PING6_RTHDR) $(DEF_CRYPTO)
 LIB_ping6 = $(LIB_CAP) $(LIB_IDN) $(LIB_RESOLV) $(LIB_CRYPTO)
 
+#列出所有依赖关系
 ping: ping_common.o
 ping6: ping_common.o
 ping.o ping_common.o: ping_common.h
@@ -201,6 +210,7 @@ DEF_rdisc = $(DEF_ENABLE_RDISC_SERVER)
 LIB_rdisc =
 
 # tracepath
+#设置tracepath
 DEF_tracepath = $(DEF_IDN)
 LIB_tracepath = $(LIB_IDN)
 
@@ -209,6 +219,7 @@ DEF_tracepath6 = $(DEF_IDN)
 LIB_tracepath6 =
 
 # traceroute6
+# 设置traceroute6
 DEF_traceroute6 = $(DEF_CAP) $(DEF_IDN)
 LIB_traceroute6 = $(LIB_CAP) $(LIB_IDN)
 
@@ -217,6 +228,7 @@ DEF_tftpd =
 DEF_tftpsubs =
 LIB_tftpd =
 
+#列出依赖关系
 tftpd: tftpsubs.o
 tftpd.o tftpsubs.o: tftp.h
 
@@ -233,6 +245,8 @@ ninfod:
 
 # -------------------------------------
 # modules / check-kernel are only for ancient kernels; obsolete
+#检测内核模块
+#仅检测较低版本的内核
 check-kernel:
 ifeq ($(KERNEL_INCLUDE),)
 	@echo "Please, set correct KERNEL_INCLUDE"; false
@@ -246,9 +260,11 @@ modules: check-kernel
 	$(MAKE) KERNEL_INCLUDE=$(KERNEL_INCLUDE) -C Modules
 
 # -------------------------------------
+#生成帮助文档
 man:
 	$(MAKE) -C doc man
 
+#生成html文档
 html:
 	$(MAKE) -C doc html
 
@@ -269,6 +285,7 @@ distclean: clean
 		fi
 
 # -------------------------------------
+#快照
 snapshot:
 	@if [ x"$(UNAME_N)" != x"pleiades" ]; then echo "Not authorized to advance snapshot"; exit 1; fi
 	@echo "[$(TAG)]" > RELNOTES.NEW
