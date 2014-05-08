@@ -69,12 +69,15 @@ ENABLE_RDISC_SERVER=no
 #-Wstrict-prototypes: 如果函数的声明或定义没有指出参数类型，编译器就发出警告
 CCOPT=-fno-strict-aliasing -Wstrict-prototypes -Wall -g
 CCOPTOPT=-O3
+#-D_GNU_SOURCE表示符合GNU标准
 GLIBCFIX=-D_GNU_SOURCE
 DEFINES=
 LDLIB=
 
 FUNC_LIB = $(if $(filter static,$(1)),$(LDFLAG_STATIC) $(2) $(LDFLAG_DYNAMIC),$(2))
 
+#使用GNUTLS模块与库
+#使用CRYPTO库
 # USE_GNUTLS: DEF_GNUTLS, LIB_GNUTLS
 # USE_CRYPTO: LIB_CRYPTO
 ifneq ($(USE_GNUTLS),no)
@@ -85,37 +88,44 @@ else
 endif
 
 # USE_RESOLV: LIB_RESOLV
+#使用RESOLV库
 LIB_RESOLV = $(call FUNC_LIB,$(USE_RESOLV),$(LDFLAG_RESOLV))
 
 # USE_CAP:  DEF_CAP, LIB_CAP
+#使用模块CAP，使用CAP库
 ifneq ($(USE_CAP),no)
 	DEF_CAP = -DCAPABILITIES
 	LIB_CAP = $(call FUNC_LIB,$(USE_CAP),$(LDFLAG_CAP))
 endif
 
 # USE_SYSFS: DEF_SYSFS, LIB_SYSFS
+#使用模块SYSFS，使用SYSFS库
 ifneq ($(USE_SYSFS),no)
 	DEF_SYSFS = -DUSE_SYSFS
 	LIB_SYSFS = $(call FUNC_LIB,$(USE_SYSFS),$(LDFLAG_SYSFS))
 endif
 
 # USE_IDN: DEF_IDN, LIB_IDN
+#使用模块IDN（对国际化域名），使用IDN库
 ifneq ($(USE_IDN),no)
 	DEF_IDN = -DUSE_IDN
 	LIB_IDN = $(call FUNC_LIB,$(USE_IDN),$(LDFLAG_IDN))
 endif
 
 # WITHOUT_IFADDRS: DEF_WITHOUT_IFADDRS
+#获取本地IP地址
 ifneq ($(WITHOUT_IFADDRS),no)
 	DEF_WITHOUT_IFADDRS = -DWITHOUT_IFADDRS
 endif
 
 # ENABLE_RDISC_SERVER: DEF_ENABLE_RDISC_SERVER
+#使用RDISC（路由器发现守护程序）服务器
 ifneq ($(ENABLE_RDISC_SERVER),no)
 	DEF_ENABLE_RDISC_SERVER = -DRDISC_SERVER
 endif
 
 # ENABLE_PING6_RTHDR: DEF_ENABLE_PING6_RTHDR
+#使用PING6源路由
 ifneq ($(ENABLE_PING6_RTHDR),no)
 	DEF_ENABLE_PING6_RTHDR = -DPING6_ENABLE_RTHDR
 ifeq ($(ENABLE_PING6_RTHDR),RFC3542)
@@ -124,6 +134,7 @@ endif
 endif
 
 # -------------------------------------
+#列出要生成的目标文件
 IPV4_TARGETS=tracepath ping clockdiff rdisc arping tftpd rarpd
 IPV6_TARGETS=tracepath6 traceroute6 ping6
 TARGETS=$(IPV4_TARGETS) $(IPV6_TARGETS)
