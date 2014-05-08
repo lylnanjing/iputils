@@ -6,8 +6,10 @@
 #指定gcc程序作为编译程序
 CC=gcc
 # Path to parent kernel include files directory
+#父内核包含的路径为头文件目录
 LIBC_INCLUDE=/usr/include
 # Libraries
+#库
 ADDLIB=
 # Linker flags
 #Wl选项告诉编译器将后面的参数传递给链接器
@@ -15,7 +17,7 @@ ADDLIB=
 #-Wl,-Bdynamic就是告诉链接器对接下来的-l选项使用动态链接
 LDFLAG_STATIC=-Wl,-Bstatic
 LDFLAG_DYNAMIC=-Wl,-Bdynamic
-#指定加载库lcap
+#指定各种加载库
 LDFLAG_CAP=-lcap
 LDFLAG_GNUTLS=-lgnutls-openssl
 LDFLAG_CRYPTO=-lcrypto
@@ -25,30 +27,40 @@ LDFLAG_SYSFS=-lsysfs
 
 #
 # Options
+#所有选项
 #
 #变量定义，设置开关
 # Capability support (with libcap) [yes|static|no]
+#功能支持库libcap
 USE_CAP=yes
 # sysfs support (with libsysfs - deprecated) [no|yes|static]
+#sysfs的支持（与libsysfs - 不建议使用）
 USE_SYSFS=no
 # IDN support (experimental) [no|yes|static]
+#支持IDN（国际化域名）（实验）
 USE_IDN=no
 
-# Do not use getifaddrs [no|yes|static]
+# 不使用getifaddrs [no|yes|static]
 WITHOUT_IFADDRS=no
 # arping default device (e.g. eth0) []
+#arping的默认设备（如eth0的）
 ARPING_DEFAULT_DEVICE=
 
 # GNU TLS library for ping6 [yes|no|static]
+#使用GNUTLS库
 USE_GNUTLS=yes
 # Crypto library for ping6 [shared|static]
+#分享ping6的密码库
 USE_CRYPTO=shared
 # Resolv library for ping6 [yes|static]
+#使用Resolv库
 USE_RESOLV=yes
 # ping6 source routing (deprecated by RFC5095) [no|yes|RFC3542]
+#不使用ping6源路由（由RFC5095不建议使用）
 ENABLE_PING6_RTHDR=no
 
 # rdisc server (-r option) support [no|yes]
+#不支持RDISC服务器（-r选项）
 ENABLE_RDISC_SERVER=no
 
 # -------------------------------------
@@ -229,6 +241,7 @@ man:
 html:
 	$(MAKE) -C doc html
 
+#删除已生成的目标文件
 clean:
 	@rm -f *.o $(TARGETS)
 	@$(MAKE) -C Modules clean
